@@ -1,12 +1,17 @@
 # edit this makefile so that running make compiles your enigma program
+CXX := clang++
+CXX_FLAGS := -std=c++11 -stdlib=libc++ 
 
-enigma: Main.o
-	g++ -o enigma Main.o
+MODS = Main utilities
 
-Main.o: Main.cpp
-	g++ -c Main.cpp
+enigma: $(addsuffix .o, $(MODS))
+	$(CXX) $(CXX_FLAGS) -o $@ $^
+
+%.o: %.cpp
+	$(CXX) $(CXX_FLAGS) -c $< -o $@
 
 clean:
-	rm -rf enigma *.o
+	rm -f $(addsuffix .o, $(MODS))
+	rm -r enigma
 
 .PHONY: clean
