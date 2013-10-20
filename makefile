@@ -2,7 +2,7 @@
 CXX := clang++
 CXX_FLAGS := -std=c++11 -stdlib=libc++ 
 
-MODS = Main utilities
+MODS = Main components mappingComponent machine
 
 enigma: $(addsuffix .o, $(MODS))
 	$(CXX) $(CXX_FLAGS) -o $@ $^
