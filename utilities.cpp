@@ -1,33 +1,35 @@
-#include <array>
+#include <deque>
 #include <fstream>
 
+// TODO: Make sure everything assumes A = 1
 using namespace std;
 
-static inline array<int,26> initialiseArray(array<int,26> array);
+static inline deque<int> initialiseDeque(deque<int> dq);
 
 class mappingComponent
 {
 protected:
   int position;
-  array<int,26> mapping; 
+  deque<int> mapping; 
 
 public:
   mappingComponent()
   {
     position = 0;
-    initialiseArray(mapping);
+    initialiseDeque(mapping);
   }
-  int getRotate() 
+  int getPosition() 
   {
     return position;
   }
-  void rotate()
+  int getMapping(int index)
   {
-    position++;
+    // Index - 1 because A = 1 but first element is mapping[0]
+    return mapping[index - 1];
   }
-  virtual int getMapping(int index)
+  int getReverseMapping(int chr)
   {
-    return mapping[index];
+    return 0; // TODO
   }
   virtual void setUpComponent(char* path) = 0;
 };
@@ -37,23 +39,24 @@ class rotor : public mappingComponent
 public:
   void setUpComponent(char* path)
   {
-    int i = 0;
-    int read_int = 0;
+    int read_int;
     ifstream fin(path);
 
     if (!fin) 
     {
       throw ios_base::failure("Set up rotor failed");
     }
-    while (fin >> read_int) {
+    for (int i = 0; fin >> read_int; i++) 
+    {
       mapping[i] = read_int;
-      i++;
     }
   }
 
-  int getMapping(int index)
+  void rotate()
   {
-    return mapping[index + (position % 26)];
+    position++;
+    mapping.push_back(mapping[mapping.size() - 1]);
+    mapping.pop_front();
   }
 };
 
@@ -62,8 +65,8 @@ class plugboard : public mappingComponent
 public:
   void setUpComponent(char* path)
   {
-    int read_int1 = 0;
-    int read_int2 = 0;
+    int read_int1;
+    int read_int2;
     ifstream fin(path);
     
     if (!fin) 
@@ -71,18 +74,73 @@ public:
       throw ios_base::failure("Set up plugboard failed");
     }
     while (fin >> read_int1) {
-      // Always possible to even amount of ints in file
+      // Always possible due to even amount of ints in file
       fin >> read_int2; 
       mapping[read_int1] = read_int2;
+      mapping[read_int2] = read_int1;
     }
   }
 };
 
-static inline array<int,26> initialiseArray(array<int,26> array)
+class enigma
 {
-  for(int i = 0; i < 26; i++)
+  int NUM_ROTORS;
+  plugboard pbd;
+  rotor* rtr;
+
+public:
+  enigma(int argc, char** argv)
   {
-    array[i] = i;
+    NUM_ROTORS = argc - 2;
+    rtr = new rotor[NUM_ROTORS];
+
+    pbd.setUpComponent(argv[argc - 1]);
+    for(int i = 0; i < NUM_ROTORS; i++)
+    {
+      rtr[i].setUpComponent(argv[i + 1]);
+    }
   }
-  return array;
+
+  int encode_decode(int chr)
+  {
+    chr = pbd.getMapping(chr);
+    for(int i = 0; i < NUM_ROTORS; i++)
+    {
+      chr = rtr[i].getMapping(chr);
+    }
+    chr = reflect(chr);
+    for(int i = NUM_ROTORS - 1; i > 0; i--)
+    {
+      chr = rtr[i].getReverseMapping(chr);
+    }
+    chr = pbd.getMapping(chr);
+    rotate();
+    return chr;
+  }
+
+  void rotate()
+  {
+    // Needs to sort out rotating for the rtr deque
+  }
+
+  int reflect(int chr)
+  {
+    return (chr + 13) % 26;
+  }
+
+  void delete_enigma()
+  {
+
+  }
+
+};
+
+// TODO: Make sure this isnt creating a copy of deque
+static inline deque<int> initialiseDeque(deque<int> dq)
+{
+  for(int i = 1; i <= 26; i++)
+  {
+    dq.push_back(i);
+  }
+  return dq;
 }

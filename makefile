@@ -11,7 +11,6 @@ enigma: $(addsuffix .o, $(MODS))
 	$(CXX) $(CXX_FLAGS) -c $< -o $@
 
 clean:
-	rm -f $(addsuffix .o, $(MODS))
-	rm -r enigma
+	rm -rf $(addsuffix .o, $(MODS)) enigma
 
 .PHONY: clean
