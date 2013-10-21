@@ -1,5 +1,7 @@
 #include "mappingComponent.cpp"
 
+static void printDeque(deque<int>& dq);
+
 class rotor : public mappingComponent
 {
 public:

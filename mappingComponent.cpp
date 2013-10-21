@@ -1,9 +1,11 @@
 #include <deque>
 #include <fstream>
+#include <stdexcept>
+#include <iostream>
 
 using namespace std;
 
-static inline deque<int> initialiseDeque(deque<int> dq);
+static inline deque<int> initialiseDeque(deque<int>& dq);
 
 class mappingComponent
 {
@@ -23,8 +25,7 @@ public:
   }
   int getMapping(int index)
   {
-    // Index - 1 because A = 1 but first element is mapping[0]
-    return mapping[index - 1];
+    return mapping[index];
   }
   int getReverseMapping(int chr)
   {
@@ -40,10 +41,9 @@ public:
   virtual void setUpComponent(char* path) = 0;
 };
 
-// TODO: Make sure this isnt creating a copy of deque (pass by reference)
-static inline deque<int> initialiseDeque(deque<int> dq)
+static inline deque<int> initialiseDeque(deque<int>& dq)
 {
-  for(int i = 1; i <= 26; i++)
+  for(int i = 0; i < 26; i++)
   {
     dq.push_back(i);
   }

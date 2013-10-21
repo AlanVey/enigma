@@ -6,16 +6,40 @@ class machine
   plugboard pbd;
   rotor* rtr;
 
+  void rotate()
+  {
+    rtr[0].rotate();
+    for(int i = 0; i < NUM_ROTORS; i++)
+    {
+      if(rtr[i].getPosition() >= 26 && (rtr[i].getPosition() % 26) == 0)
+      {
+        if(i + 1 < NUM_ROTORS)
+        {
+          rtr[i + 1].rotate();
+        }
+      }
+    }
+  }
+
+  int reflect(int chr)
+  {
+    return ((chr + 13) % 26);
+  }
+
 public:
   machine(int argc, char** argv)
   {
     NUM_ROTORS = argc - 2;
-    rtr = new rotor[NUM_ROTORS];
 
     pbd.setUpComponent(argv[argc - 1]);
-    for(int i = 0; i < NUM_ROTORS; i++)
+
+    if(NUM_ROTORS > 0)
     {
-      rtr[i].setUpComponent(argv[i + 1]);
+      rtr = new rotor[NUM_ROTORS];
+      for(int i = 0; i < NUM_ROTORS; i++)
+      {
+        rtr[i].setUpComponent(argv[i + 1]);
+      }
     }
   }
 
@@ -27,27 +51,23 @@ public:
       chr = rtr[i].getMapping(chr);
     }
     chr = reflect(chr);
-    for(int i = NUM_ROTORS - 1; i > 0; i--)
+    if(NUM_ROTORS > 0)
     {
-      chr = rtr[i].getReverseMapping(chr);
+      for(int i = NUM_ROTORS - 1; i >= 0; i--)
+      {
+        chr = rtr[i].getReverseMapping(chr);
+      }
+      rotate();
     }
     chr = pbd.getMapping(chr);
-    rotate();
     return chr;
   }
 
-  void rotate()
+  void delete_machine()
   {
-    // Needs to sort out rotating for the rtr deque
-  }
-
-  int reflect(int chr)
-  {
-    return (chr + 13) % 26;
-  }
-
-  void delete_enigma()
-  {
-
+    if(NUM_ROTORS > 0)
+    {
+      delete [] rtr;
+    }
   }
 };
